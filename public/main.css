@@ -28,3 +28,9 @@ body {
 #chat li:nth-child(odd) { 
     background-color: rgba(0,0,0,0.2); 
 }
+
+.admin {
+    background-color: black;
+    color: white;
+    text-align: center;
+}

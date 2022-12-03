@@ -4,14 +4,26 @@
     <%- include('header'); -%>
 
     <h2 class="title">ECS Example Game</h2>
-
     <div id="game">
+        <div class="admin">
+            <p><strong>Debug information:</strong>My state: {{me}} | Game state: {{state.state}} | Players: {{players}}</p>
+        </div>
         <div v-if="connected">
-            <%- include('chat'); -%>
+            <div v-if="loggedIn == false">
+                <%- include('login'); -%>
+            </div>
+            <div v-if="isAdmin">
+                <%- include('adminPanel'); -%>
+            </div>
+            <div v-if="state.state == 1">
+                <%- include('promptsSuggestion'); -%>
+            </div>
+            <!-- <%- include('chat'); -%> -->
         </div>
         <div v-else>
             <p>Connecting...</p>
         </div>
+
     </div>
 
     <%- include('footer'); -%>

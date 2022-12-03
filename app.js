@@ -22,13 +22,19 @@ app.get('/display', (req, res) => {
   res.render('display');
 });
 
-let nextPlayerNum = 0;
 let connected_clients = new Map();
-let players = new Map();
-let audience = new Map();
+const players = [];
+const audience = [];
 let clientToSockets = new Map();
 let socketsToClients = new Map();
+let activePrompts = new Map();
+let answersReceived = new Map();
+let votesReceived = new Map();
+let currentPrompt;
 let state = {state: 0};
+// let state = {state: 0, players: players, audience: audience, activePrompts: activePrompts, answersReceived: answersReceived, 
+            // votesReceived: votesReceived, currentPrompt: currentPrompt};
+let admin;
 
 const requestOptions = {
   method: 'POST',
@@ -40,9 +46,9 @@ const requestOptions = {
   }
 };
 
-function registerPlayer(requestData) {
+function azureConnection(requestData, functionToCall) {
   const playerOptions = requestOptions;
-  playerOptions.path = "/api/player/register"
+  playerOptions.path = "/api/" + functionToCall;
 
   return new Promise((resolve, reject) => {
       const request = https.request(playerOptions, (res) => {
@@ -73,34 +79,160 @@ function startServer() {
     });
 }
 
-//Chat message
-function handleChat(message) {
-    console.log('Handling chat: ' + message); 
-    io.emit('chat',message);
+function updateAll() {
+  console.log("Updating all players");
+  for (let [user, socket] of clientToSockets) {
+    updatePlayer(user, socket);
+  }
+}
+
+function updatePlayer(user, socket) {
+  console.log("Updating player: " + user);
+  const thePlayer = connected_clients.get(user);
+  const data = {state: state, me: thePlayer, players: players};
+  socket.emit('state', data);
+}
+
+function error(socket, message, halt) {
+  console.log("Error: " + message);
+  socket.emit('fail', message);
+  if (halt) {
+    socket.disconnect();
+  }
 }
 
 function handleRegister(user, pass, socket) {
   console.log("Handle register: " + socket);
 
-  const promise = registerPlayer({username: user, password: pass})
+  const promise = azureConnection({username: user, password: pass}, "/player/register");
   promise.then((res) => {
       console.log(res)
       if (res.result == true) {
-        nextPlayerNum++;
-        connected_clients.set(nextPlayerNum, {name: user, score: 0});
-        clientToSockets.set(nextPlayerNum, socket);
-        socketsToClients.set(socket, nextPlayerNum);
-        if (connected_clients.size <= 8) {
-          players.set(nextPlayerNum , {name: user, score: 0});
-        }
-        console.log("register successfull!");
-        console.log(connected_clients);
-        console.log(clientToSockets);
-        console.log(socketsToClients);
-        console.log(players);
+        handleGameJoin(user, socket);
+      } else {
+        error(socket, res.msg, false);
       }
   })
+}
 
+function handleLogin(user, pass, socket) {
+  console.log("Handle login: " + socket);
+
+  const promise = azureConnection({username: user, password: pass}, "/player/login");
+  promise.then((res) => {
+      console.log(res)
+      if (res.result == true) {
+        handleGameJoin(user, socket);
+      } else {
+        error(socket, res.msg, false);
+      }
+  })
+}
+
+function handleGameJoin(user, socket) {
+  if (clientToSockets.has(user) == false) {
+    connected_clients.set(user, {name: user, score: 0, state: 0});
+    clientToSockets.set(user, socket);
+    socketsToClients.set(socket, user);
+    if (connected_clients.size <= 8 && state.state == 0) {
+      if (players.length == 0) {
+        socket.emit('setAdmin');
+        admin = socket;
+      }
+      players.push(user);
+      socket.emit('joinedGame');
+      updateAll();
+    } else {
+      audience.push(user);
+      socket.emit('joinedGame');
+      updateAll();
+    }
+  } else {
+    error(socket, "ERROR: PLAYER IS ALREADY IN THE GAME!", true);
+  }
+}
+
+function handlePrompt(prompt, password, socket) {
+  const promise = azureConnection({username: socketsToClients.get(socket), password: password, text: prompt}, "/prompt/create");
+  promise.then((res) => {
+      console.log(res)
+      if (res.result == true) {
+        activePrompts.set(prompt, socket);
+        connected_clients.get(socketsToClients.get(socket)).state = 1;
+        updatePlayer(socketsToClients.get(socket), socket);
+        console.log(activePrompts.keys());
+      } else {
+        error(socket, res.msg, false);
+      }
+  })
+}
+function startPrompt() {
+
+}
+function endPrompt() {
+
+}
+
+function handleAnswer() {
+
+}
+function startAnswer() {
+
+}
+function endAnswer() {
+
+}
+
+function handleVote() {
+
+}
+function startVote() {
+
+}
+function endVote() {
+
+}
+
+function startResult() {
+
+}
+function endResult() {
+
+}
+
+function startScore() {
+
+}
+function endScore() {
+
+}
+
+function gameOver() {
+
+}
+
+function handleNext() {
+  state.state += 1;
+  if (state == 1) {
+    startPrompt();
+  } else if (state == 2){
+    endPrompt();
+    startAnswer();
+  } else if (state == 3){
+    endAnswer();
+    startVote();
+  } else if (state == 4){
+    endVote();
+    startResult();
+  } else if (state == 5){
+    endResult();
+    startScore();
+  } else if (state == 6){
+    endScore();
+    gameOver();
+  }
+
+  updateAll();
 }
 
 //Handle new connection
@@ -115,19 +247,54 @@ io.on('connection', socket => {
   //Handle disconnection
   socket.on('disconnect', () => {
     console.log('Dropped connection');
+    const player = socketsToClients.get(socket);
+    const index = players.indexOf(player);
+    if (index > -1) {
+      players.splice(index, 1);
+    } else {
+      audience.splice(index, 1);
+    }
+    clientToSockets.delete(player);
+    connected_clients.delete(player);
+    socketsToClients.delete(socket);
+    if (admin == socket) {
+      admin = clientToSockets.get(players[0]);
+      if (admin != undefined) {
+        admin.emit('setAdmin');
+      }
+    }
+    updateAll();
   });
 
   socket.on('register', info => {
     handleRegister(info.username, info.password, socket);
+  });
+
+  socket.on('login', info => {
+    console.log('Username: ' + info.username + ' ' + 'Password: ' + info.password);
+    handleLogin(info.username, info.password, socket);
+  });
+
+  socket.on('prompt', info => {
+    handlePrompt(info.prompt, info.password, socket);
+  });
+
+  socket.on('answer', info => {
+    handleAnswer();
+  });
+
+  socket.on('vote', info => {
+    handleVote();
+  });
+
+  socket.on('next', info => {
+    handleNext();
   });
 });
 
 //Start server
 if (module === require.main) {
   startServer();
-  
-  handleRegister("test", "test1234", null);
-
 }
 
 module.exports = server;

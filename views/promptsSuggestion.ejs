@@ -1,0 +1,10 @@
+<div>
+    <div v-if="me.state == 0">
+        <input type="text" @keyup.enter="handlePrompt()" v-model="prompt" class="form-control" placeholder="Suggest a prompt">
+    </div>
+    <div v-else>
+        <p>
+            Your suggested prompt: {{prompt}}
+        </p>
+    </div>
+</div>

@@ -6,7 +6,13 @@ var app = new Vue({
     data: {
         connected: false,
         messages: [],
-        chatmessage: '',
+        prompt: '',
+        me: {name: '', score: 0, state: 0},
+        state: {state: 0},
+        players: [],
+        loggedIn: false,
+        isAdmin: false,
+        password: ''
     },
     mounted: function() {
         connect(); 
@@ -22,6 +28,27 @@ var app = new Vue({
             socket.emit('chat',this.chatmessage);
             this.chatmessage = '';
         },
+        login(username, password) {
+            socket.emit('login', {username: username, password: password});
+            this.password = password;
+        },
+        register(username, password) {
+            socket.emit('register', {username: username, password: password});
+        },
+        updateState(state) {
+            this.me = state.me;
+            this.state = state.state;
+            this.players = state.players;
+        },
+        startGame() {
+            socket.emit('next');
+        },
+        next() {
+            socket.emit('next');
+        },
+        handlePrompt() {
+            socket.emit('prompt', {prompt: this.prompt, password: this.password});
+        }
     }
 });
 
@@ -51,5 +78,19 @@ function connect() {
         app.handleChat(message);
     });
 
+    socket.on('state', function(message) {
+        app.updateState(message);
+    });
 
+    socket.on('joinedGame', function() {
+        app.loggedIn = true;
+    });
+
+    socket.on('setAdmin', function() {
+        app.isAdmin = true;
+    });
+
+    socket.on('fail', function(message) {
+        alert('Error: '+ message);
+    });
 }

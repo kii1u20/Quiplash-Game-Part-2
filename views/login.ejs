@@ -1,0 +1,6 @@
+<div v-if="me.state == 0">
+    <input v-model="username" placeholder="Username"/>
+    <input v-model="password" placeholder="Password"/>    
+    <button class="btn btn-lg btn-primary" @click="login(username, password)">Login</button>
+    <button class="btn btn-lg btn-primary" @click="register(username, password)">Register</button>
+</div>
