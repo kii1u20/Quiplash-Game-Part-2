@@ -18,6 +18,9 @@
             <div v-if="state.state == 1">
                 <%- include('promptsSuggestion'); -%>
             </div>
+            <div v-if="state.state == 2">
+                <%- include('promptAnswer'); -%>
+            </div>
             <!-- <%- include('chat'); -%> -->
         </div>
         <div v-else>

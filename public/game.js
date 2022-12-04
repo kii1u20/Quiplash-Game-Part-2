@@ -5,14 +5,16 @@ var app = new Vue({
     el: '#game',
     data: {
         connected: false,
-        messages: [],
+        prompts: [],
         prompt: '',
         me: {name: '', score: 0, state: 0},
         state: {state: 0},
         players: [],
         loggedIn: false,
         isAdmin: false,
-        password: ''
+        password: '',
+        currentPromptIndex: 0,
+        answer: ''
     },
     mounted: function() {
         connect(); 
@@ -48,6 +50,10 @@ var app = new Vue({
         },
         handlePrompt() {
             socket.emit('prompt', {prompt: this.prompt, password: this.password});
+        },
+        handleAnswer() {
+            socket.emit('answer', {prompt: this.prompts[this.currentPromptIndex], answer: this.answer, username: this.me.name});
+            this.currentPromptIndex++;
         }
     }
 });
@@ -74,8 +80,8 @@ function connect() {
     });
 
     //Handle incoming chat message
-    socket.on('chat', function(message) {
-        app.handleChat(message);
+    socket.on('prompt', function(message) {
+        app.prompts.push(message);
     });
 
     socket.on('state', function(message) {

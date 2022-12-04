@@ -28,6 +28,7 @@ const audience = [];
 let clientToSockets = new Map();
 let socketsToClients = new Map();
 let activePrompts = new Map();
+let cloudPrompts = [];
 let answersReceived = new Map();
 let votesReceived = new Map();
 let currentPrompt;
@@ -157,10 +158,18 @@ function handlePrompt(prompt, password, socket) {
   promise.then((res) => {
       console.log(res)
       if (res.result == true) {
-        activePrompts.set(prompt, socket);
+        // if (activePrompts.get(socket) == undefined) {
+        //   const list = [];
+        //   list.push(prompt);
+        //   activePrompts.set(socket, list);
+        // } else {
+        //   const list = activePrompts.get(socket);
+        //   list.push(prompt);
+        //   activePrompts.set(socket, list);
+        // }
         connected_clients.get(socketsToClients.get(socket)).state = 1;
         updatePlayer(socketsToClients.get(socket), socket);
-        console.log(activePrompts.keys());
+        console.log(activePrompts.values());
       } else {
         error(socket, res.msg, false);
       }
@@ -170,14 +179,52 @@ function startPrompt() {
 
 }
 function endPrompt() {
-
+  players.forEach(element => {
+    connected_clients.get(element).state = 0;
+  });
+  updateAll();
 }
 
-function handleAnswer() {
-
+function handleAnswer(info) {
+  console.log(info);
 }
 function startAnswer() {
-
+  console.log("answer started");
+  let promise;
+  if (players.length % 2 == 0) {
+    promise = azureConnection({"prompts": players.length / 2}, "/prompts/get");
+  } else {
+    promise = azureConnection({"prompts": players.length}, "/prompts/get");
+  }
+  promise.then((res) => {
+      if (res.length > 0) {
+        res.forEach(element => {
+          cloudPrompts.push(element);
+          cloudPrompts.push(element);
+        });
+        console.log(cloudPrompts.length);
+        if (players.length % 2 == 0) {
+          for (let i = 0; i < players.length; i++) {
+            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[i].text);
+          }
+        } else {
+          var i, j;
+          for (i = 0, j = 0; i < players.length; i++, j++) {
+            console.log("i: " + i + " " + "j: " + j);
+            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[j].text);
+            if (i == players.length - 1) {
+              console.log("resseting i " + i);
+              i = -1;
+            }
+            if (j == cloudPrompts.length - 1) {
+              break;
+            }
+          }
+        }
+      } else {
+        // error(socket, res.msg, false); //Something else, not at error. Maybe just prompts from the local game?
+      }
+  })
 }
 function endAnswer() {
 
@@ -213,21 +260,21 @@ function gameOver() {
 
 function handleNext() {
   state.state += 1;
-  if (state == 1) {
+  if (state.state == 1) {
     startPrompt();
-  } else if (state == 2){
+  } else if (state.state == 2){
     endPrompt();
     startAnswer();
-  } else if (state == 3){
+  } else if (state.state == 3){
     endAnswer();
     startVote();
-  } else if (state == 4){
+  } else if (state.state == 4){
     endVote();
     startResult();
-  } else if (state == 5){
+  } else if (state.state == 5){
     endResult();
     startScore();
-  } else if (state == 6){
+  } else if (state.state == 6){
     endScore();
     gameOver();
   }
@@ -280,7 +327,7 @@ io.on('connection', socket => {
   });
 
   socket.on('answer', info => {
-    handleAnswer();
+    handleAnswer(info);
   });
 
   socket.on('vote', info => {
