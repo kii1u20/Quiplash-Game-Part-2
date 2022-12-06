@@ -33,8 +33,6 @@ let answersReceived = new Map();
 let votesReceived = new Map();
 let currentPrompt;
 let state = {state: 0};
-// let state = {state: 0, players: players, audience: audience, activePrompts: activePrompts, answersReceived: answersReceived, 
-            // votesReceived: votesReceived, currentPrompt: currentPrompt};
 let admin;
 
 const requestOptions = {
@@ -81,14 +79,12 @@ function startServer() {
 }
 
 function updateAll() {
-  console.log("Updating all players");
   for (let [user, socket] of clientToSockets) {
     updatePlayer(user, socket);
   }
 }
 
 function updatePlayer(user, socket) {
-  console.log("Updating player: " + user);
   const thePlayer = connected_clients.get(user);
   const data = {state: state, me: thePlayer, players: players};
   socket.emit('state', data);
@@ -158,18 +154,8 @@ function handlePrompt(prompt, password, socket) {
   promise.then((res) => {
       console.log(res)
       if (res.result == true) {
-        // if (activePrompts.get(socket) == undefined) {
-        //   const list = [];
-        //   list.push(prompt);
-        //   activePrompts.set(socket, list);
-        // } else {
-        //   const list = activePrompts.get(socket);
-        //   list.push(prompt);
-        //   activePrompts.set(socket, list);
-        // }
         connected_clients.get(socketsToClients.get(socket)).state = 1;
         updatePlayer(socketsToClients.get(socket), socket);
-        console.log(activePrompts.values());
       } else {
         error(socket, res.msg, false);
       }
@@ -186,9 +172,30 @@ function endPrompt() {
 }
 
 function handleAnswer(info) {
-  console.log(info);
+  let username = info.username;
+  let prompt = info.prompt;
+  let answer = info.answer;
+  let stringified = JSON.stringify({id: prompt.id, text: prompt.text});
+  if (answersReceived.has(stringified)) {
+    let listA = answersReceived.get(stringified);
+    let mapA = {};
+    mapA[username] = answer;
+    listA.push(mapA);
+    answersReceived.set(stringified, listA);
+  } else {
+    let listA = [];
+    let mapA = {};
+    mapA[username] = answer;
+    listA.push(mapA);
+    answersReceived.set(stringified, listA);
+  }
+  console.log(answersReceived);
+
+  connected_clients.get(username).state = 1;
+  updatePlayer(username, clientToSockets.get(username));
 }
 function startAnswer() {
+  cloudPrompts = [];
   console.log("answer started");
   let promise;
   if (players.length % 2 == 0) {
@@ -205,15 +212,13 @@ function startAnswer() {
         console.log(cloudPrompts.length);
         if (players.length % 2 == 0) {
           for (let i = 0; i < players.length; i++) {
-            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[i].text);
+            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[i]);
           }
         } else {
           var i, j;
           for (i = 0, j = 0; i < players.length; i++, j++) {
-            console.log("i: " + i + " " + "j: " + j);
-            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[j].text);
+            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[j]);
             if (i == players.length - 1) {
-              console.log("resseting i " + i);
               i = -1;
             }
             if (j == cloudPrompts.length - 1) {
@@ -227,14 +232,21 @@ function startAnswer() {
   })
 }
 function endAnswer() {
-
+  players.forEach(element => {
+    connected_clients.get(element).state = 0;
+  });
+  updateAll();
 }
 
 function handleVote() {
 
 }
 function startVote() {
-
+  console.log("starting vote");
+  console.log(JSON.stringify(Object.fromEntries(answersReceived)));
+  for (let [user, socket] of clientToSockets) {
+    socket.emit('voting', JSON.stringify(Object.fromEntries(answersReceived)));
+  }
 }
 function endVote() {
 

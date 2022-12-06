@@ -1,7 +1,15 @@
 <div v-if="prompts[currentPromptIndex] != undefined">
-    <p class="title">{{prompts[currentPromptIndex]}}</p>
+    <p class="title">{{prompts[currentPromptIndex].text}}</p>
 
     <div v-if="me.state == 0">
         <input type="text" @keyup.enter="handleAnswer()" v-model="answer" class="form-control" placeholder="Enter your answer">
+    </div>
+    <div v-else>
+        <p>
+            Your answer: {{answer}}
+        </p>
+        <div v-if="currentPromptIndex != prompts.length - 1">
+            <button class="btn btn-lg btn-primary" @click="advancePrompt()">Next</button>
+        </div>
     </div>
 </div>

@@ -53,6 +53,12 @@ var app = new Vue({
         },
         handleAnswer() {
             socket.emit('answer', {prompt: this.prompts[this.currentPromptIndex], answer: this.answer, username: this.me.name});
+        },
+        advancePrompt() {
+            this.currentPromptIndex++;
+            this.me.state = 0;
+        },
+        vote() {
             this.currentPromptIndex++;
         }
     }
@@ -98,5 +104,10 @@ function connect() {
 
     socket.on('fail', function(message) {
         alert('Error: '+ message);
+    });
+
+    socket.on('voting' , function(message) {
+        app.prompts = JSON.parse(message);
+        app.currentPromptIndex = 0;
     });
 }

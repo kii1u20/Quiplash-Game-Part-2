@@ -1,0 +1,10 @@
+<div v-if="currentPromptIndex != Object.keys(prompts).length">
+    <p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex]).text}}</p>
+    <button class="btn btn-lg btn-primary" @click="vote()">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][0])[0]}}</button>
+    <button class="btn btn-lg btn-primary" @click="vote()">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][1])[0]}}</button>
+    <!-- this may break if there is no second answer because of the indexes! -->
+</div>
+<div v-else>
+    <p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex - 1]).text}}</p>
+    <p>Waiting for everyone to vote...</p>
+</div>
