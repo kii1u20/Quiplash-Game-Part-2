@@ -233,13 +233,13 @@ function startAnswer() {
 }
 function endAnswer() {
   players.forEach(element => {
-    connected_clients.get(element).state = 0;
+    connected_clients.get(element).state = 100;
   });
   updateAll();
 }
 
-function handleVote() {
-
+function handleVote(info) {
+  console.log(info);
 }
 function startVote() {
   console.log("starting vote");
@@ -343,7 +343,7 @@ io.on('connection', socket => {
   });
 
   socket.on('vote', info => {
-    handleVote();
+    handleVote(info);
   });
 
   socket.on('next', info => {

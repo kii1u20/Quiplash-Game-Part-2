@@ -58,7 +58,8 @@ var app = new Vue({
             this.currentPromptIndex++;
             this.me.state = 0;
         },
-        vote() {
+        vote(index) {
+            socket.emit('vote', this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][index]);
             this.currentPromptIndex++;
         }
     }
