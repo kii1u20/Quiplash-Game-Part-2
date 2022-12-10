@@ -119,6 +119,8 @@ function connect() {
             if (Object.keys(element)[0] == app.me.name) {
                 app.currentPromptIndex++;
                 continue;
+            } else {
+                continue;
             }
         }
     });
