@@ -115,6 +115,12 @@ function connect() {
     socket.on('voting' , function(message) {
         app.prompts = JSON.parse(message);
         app.currentPromptIndex = 0;
+        for (let element of app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]]) {
+            if (Object.keys(element)[0] == app.me.name) {
+                app.currentPromptIndex++;
+                continue;
+            }
+        }
     });
 
     socket.on('result', function(message) {

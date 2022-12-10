@@ -1,4 +1,4 @@
-<div v-if="prompts != undefined && currentPromptIndex != Object.keys(prompts).length">
+<div v-if="prompts != undefined && currentPromptIndex < Object.keys(prompts).length">
     <p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex]).text}}</p>
     <button class="btn btn-lg btn-primary" @click="vote(0)">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][0])[0]}}</button>
     <button class="btn btn-lg btn-primary" @click="vote(1)">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][1])[0]}}</button>
