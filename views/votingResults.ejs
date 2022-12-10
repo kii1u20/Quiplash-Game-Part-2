@@ -1,0 +1,25 @@
+<p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex]).text}}</p>
+<div class="parent">
+    <div class="child">
+        <p>{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]].answer1)[0]}}</p>
+        <p>{{Object.keys(prompts[Object.keys(prompts)[currentPromptIndex]].answer1)[0]}}</p>
+        <div v-for="item of prompts[Object.keys(prompts)[currentPromptIndex]].votes">
+            <div v-if="Object.values(item.vote)[0] == Object.values(prompts[Object.keys(prompts)[currentPromptIndex]].answer1)[0]">
+                <p>
+                    {{item.username}}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="child">
+        <p>{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]].answer2)[0]}}</p>
+        <p>{{Object.keys(prompts[Object.keys(prompts)[currentPromptIndex]].answer2)[0]}}</p>
+        <div v-for="item of prompts[Object.keys(prompts)[currentPromptIndex]].votes">
+            <div v-if="Object.values(item.vote)[0] == Object.values(prompts[Object.keys(prompts)[currentPromptIndex]].answer2)[0]">
+                <p>
+                    {{item.username}}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

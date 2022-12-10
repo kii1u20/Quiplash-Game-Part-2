@@ -27,6 +27,9 @@
             <div v-if="state.state == 3">
                 <%- include('votingScreen'); -%>
             </div>
+            <div v-if="state.state == 4">
+                <%- include('votingResults'); -%>
+            </div>
             <!-- <%- include('chat'); -%> -->
         </div>
         <div v-else>

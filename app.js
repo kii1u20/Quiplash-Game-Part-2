@@ -30,7 +30,7 @@ let socketsToClients = new Map();
 let activePrompts = new Map();
 let cloudPrompts = [];
 let answersReceived = new Map();
-let votesReceived = new Map();
+let votesReceived = {};
 let currentPrompt;
 let state = {state: 0};
 let admin;
@@ -189,7 +189,6 @@ function handleAnswer(info) {
     listA.push(mapA);
     answersReceived.set(stringified, listA);
   }
-  console.log(answersReceived);
 
   connected_clients.get(username).state = 1;
   updatePlayer(username, clientToSockets.get(username));
@@ -239,11 +238,22 @@ function endAnswer() {
 }
 
 function handleVote(info) {
-  console.log(info);
+  let temp = {};
+  temp["answer1"] = info.answer1;
+  temp["answer2"] = info.answer2;
+  temp["votes"] = [];
+  if (votesReceived[info.prompt] != undefined) {
+    votesReceived[info.prompt]['votes'].push(info.vote);
+  } else {
+    votesReceived[info.prompt] = temp;
+    votesReceived[info.prompt]['votes'].push(info.vote);
+  }
+  
+  console.log(votesReceived);
+  console.log(votesReceived[info.prompt]['votes']);
 }
 function startVote() {
   console.log("starting vote");
-  console.log(JSON.stringify(Object.fromEntries(answersReceived)));
   for (let [user, socket] of clientToSockets) {
     socket.emit('voting', JSON.stringify(Object.fromEntries(answersReceived)));
   }
@@ -253,7 +263,9 @@ function endVote() {
 }
 
 function startResult() {
-
+  players.forEach(element => {
+    clientToSockets.get(element).emit('result', votesReceived);    
+  });
 }
 function endResult() {
 

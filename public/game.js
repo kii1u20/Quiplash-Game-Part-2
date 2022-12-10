@@ -59,7 +59,12 @@ var app = new Vue({
             this.me.state = 0;
         },
         vote(index) {
-            socket.emit('vote', this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][index]);
+            emit = {};
+            emit["vote"] = {'username' : this.me.name, 'vote' : this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][index]};
+            emit["prompt"] = Object.keys(this.prompts)[this.currentPromptIndex];
+            emit["answer1"] = this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][0];
+            emit["answer2"] = this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][1];
+            socket.emit('vote', emit);
             this.currentPromptIndex++;
         }
     }
@@ -109,6 +114,11 @@ function connect() {
 
     socket.on('voting' , function(message) {
         app.prompts = JSON.parse(message);
+        app.currentPromptIndex = 0;
+    });
+
+    socket.on('result', function(message) {
+        app.prompts = message;
         app.currentPromptIndex = 0;
     });
 }
