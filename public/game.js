@@ -65,7 +65,15 @@ var app = new Vue({
             emit["answer1"] = this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][0];
             emit["answer2"] = this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][1];
             socket.emit('vote', emit);
+
             this.currentPromptIndex++;
+            
+            for (this.currentPromptIndex; this.currentPromptIndex < Object.keys(this.prompts).length; this.currentPromptIndex++) {
+                console.log(answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]]));
+                if (!answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]])) {
+                    break;
+                }
+            }
         }
     }
 });
@@ -115,12 +123,11 @@ function connect() {
     socket.on('voting' , function(message) {
         app.prompts = JSON.parse(message);
         app.currentPromptIndex = 0;
-        for (let element of app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]]) {
-            if (Object.keys(element)[0] == app.me.name) {
-                app.currentPromptIndex++;
-                continue;
-            } else {
-                continue;
+
+        for (app.currentPromptIndex; app.currentPromptIndex < Object.keys(app.prompts).length; app.currentPromptIndex++) {
+            console.log(answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]]));
+            if (!answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]])) {
+                break;
             }
         }
     });
@@ -129,4 +136,15 @@ function connect() {
         app.prompts = message;
         app.currentPromptIndex = 0;
     });
+}
+
+function answeredByUser(answers) {
+    for (let element of answers) {
+        if (Object.keys(element)[0] == app.me.name) {
+            return true;
+        } else {
+            continue;
+        }
+    }
+    return false;
 }
