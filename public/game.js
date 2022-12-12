@@ -14,6 +14,7 @@ var app = new Vue({
         isAdmin: false,
         password: '',
         currentPromptIndex: 0,
+        lastPromptIndex: 0,
         answer: ''
     },
     mounted: function() {
@@ -67,10 +68,11 @@ var app = new Vue({
             socket.emit('vote', emit);
 
             this.currentPromptIndex++;
-            
+
             for (this.currentPromptIndex; this.currentPromptIndex < Object.keys(this.prompts).length; this.currentPromptIndex++) {
                 console.log(answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]]));
                 if (!answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]])) {
+                    this.lastPromptIndex = this.currentPromptIndex;
                     break;
                 }
             }
@@ -127,6 +129,7 @@ function connect() {
         for (app.currentPromptIndex; app.currentPromptIndex < Object.keys(app.prompts).length; app.currentPromptIndex++) {
             console.log(answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]]));
             if (!answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]])) {
+                app.lastPromptIndex = app.currentPromptIndex;
                 break;
             }
         }

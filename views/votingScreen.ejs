@@ -6,6 +6,6 @@
     <!-- There is a type error thrown by the Object.keys or Object.values. May not be a problem though -->
 </div>
 <div v-else>
-    <p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex - 1]).text}}</p>
+    <p class="title">{{JSON.parse(Object.keys(prompts)[lastPromptIndex]).text}}</p>
     <p>Waiting for everyone to vote...</p>
 </div>
