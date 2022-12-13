@@ -31,7 +31,7 @@ let activePrompts = new Map();
 let cloudPrompts = [];
 let answersReceived = new Map();
 let votesReceived = {};
-let currentPrompt;
+let currentPrompts = [];
 let state = {state: 0};
 let admin;
 
@@ -154,6 +154,7 @@ function handlePrompt(prompt, password, socket) {
   promise.then((res) => {
       console.log(res)
       if (res.result == true) {
+        currentPrompts.push({username: socketsToClients.get(socket), text: prompt});
         connected_clients.get(socketsToClients.get(socket)).state = 1;
         updatePlayer(socketsToClients.get(socket), socket);
       } else {
@@ -175,7 +176,7 @@ function handleAnswer(info) {
   let username = info.username;
   let prompt = info.prompt;
   let answer = info.answer;
-  let stringified = JSON.stringify({id: prompt.id, text: prompt.text});
+  let stringified = JSON.stringify({username: prompt.username, text: prompt.text});
   if (answersReceived.has(stringified)) {
     let listA = answersReceived.get(stringified);
     let mapA = {};
@@ -196,43 +197,54 @@ function handleAnswer(info) {
 function startAnswer() {
   cloudPrompts = [];
   console.log("answer started");
-  let promise;
+  let numberOfPrompts = 0;
   if (players.length % 2 == 0) {
-    promise = azureConnection({"prompts": players.length / 2}, "/prompts/get");
+    numberOfPrompts = players.length / 2;
   } else {
-    promise = azureConnection({"prompts": players.length}, "/prompts/get");
+    numberOfPrompts = players.length;
   }
+  const promise = azureConnection({"prompts": Math.floor(numberOfPrompts / 2)}, "/prompts/get");
   promise.then((res) => {
       if (res.length > 0) {
         res.forEach(element => {
           cloudPrompts.push(element);
           cloudPrompts.push(element);
         });
-        console.log(cloudPrompts.length);
-        if (players.length % 2 == 0) {
-          for (let i = 0; i < players.length; i++) {
-            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[i]);
-          }
-        } else {
-          var i, j;
-          for (i = 0, j = 0; i < players.length; i++, j++) {
-            clientToSockets.get(players[i]).emit('prompt', cloudPrompts[j]);
-            if (i == players.length - 1) {
-              i = -1;
-            }
-            if (j == cloudPrompts.length - 1) {
-              break;
-            }
-          }
+        for (let i = 0; i < Math.round(numberOfPrompts / 2); i++) {
+          let index = Math.floor(Math.random() * currentPrompts.length);
+          cloudPrompts.push(currentPrompts[index])
+          cloudPrompts.push(currentPrompts[index])
         }
       } else {
-        // error(socket, res.msg, false); //Something else, not at error. Maybe just prompts from the local game?
+        for (let i = 0; i < currentPrompts.length; i++) {
+          if (cloudPrompts.length < numberOfPrompts * 2) {
+            let index = Math.floor(Math.random() * currentPrompts.length);
+            cloudPrompts.push(currentPrompts[index])
+            cloudPrompts.push(currentPrompts[index])
+          } else break;
+        }
+      }
+      if (players.length % 2 == 0) {
+        for (let i = 0; i < players.length; i++) {
+          clientToSockets.get(players[i]).emit('prompt', cloudPrompts[i]);
+        }
+      } else {
+        var i, j;
+        for (i = 0, j = 0; i < players.length; i++, j++) {
+          clientToSockets.get(players[i]).emit('prompt', cloudPrompts[j]);
+          if (i == players.length - 1) {
+            i = -1;
+          }
+          if (j == cloudPrompts.length - 1) {
+            break;
+          }
+        }
       }
   })
 }
 function endAnswer() {
   players.forEach(element => {
-    connected_clients.get(element).state = 100;
+    connected_clients.get(element).state = 0;
   });
   updateAll();
 }
