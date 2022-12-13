@@ -66,6 +66,7 @@ var app = new Vue({
             emit["answer1"] = this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][0];
             emit["answer2"] = this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]][1];
             socket.emit('vote', emit);
+            this.me.state = 1;
 
             this.currentPromptIndex++;
 

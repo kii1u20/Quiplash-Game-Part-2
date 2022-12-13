@@ -32,7 +32,7 @@ let cloudPrompts = [];
 let answersReceived = new Map();
 let votesReceived = {};
 let currentPrompts = [];
-let state = {state: 0};
+let state = {state: 0, round: 0};
 let admin;
 
 const requestOptions = {
@@ -198,12 +198,17 @@ function startAnswer() {
   cloudPrompts = [];
   console.log("answer started");
   let numberOfPrompts = 0;
+  let promise;
   if (players.length % 2 == 0) {
     numberOfPrompts = players.length / 2;
   } else {
     numberOfPrompts = players.length;
   }
-  const promise = azureConnection({"prompts": Math.floor(numberOfPrompts / 2)}, "/prompts/get");
+  if (currentPrompts.length == 0) {
+    promise = azureConnection({"prompts": numberOfPrompts}, "/prompts/get");
+  } else {
+    promise = azureConnection({"prompts": Math.floor(numberOfPrompts / 2)}, "/prompts/get");
+  }
   promise.then((res) => {
       if (res.length > 0) {
         res.forEach(element => {
@@ -211,9 +216,11 @@ function startAnswer() {
           cloudPrompts.push(element);
         });
         for (let i = 0; i < Math.round(numberOfPrompts / 2); i++) {
-          let index = Math.floor(Math.random() * currentPrompts.length);
-          cloudPrompts.push(currentPrompts[index])
-          cloudPrompts.push(currentPrompts[index])
+          if (currentPrompts.length != 0) {
+            let index = Math.floor(Math.random() * currentPrompts.length);
+            cloudPrompts.push(currentPrompts[index])
+            cloudPrompts.push(currentPrompts[index])
+          }
         }
       } else {
         for (let i = 0; i < currentPrompts.length; i++) {
@@ -297,6 +304,7 @@ function gameOver() {
 function handleNext() {
   state.state += 1;
   if (state.state == 1) {
+    state.round += 1;
     startPrompt();
   } else if (state.state == 2){
     endPrompt();
@@ -312,8 +320,14 @@ function handleNext() {
     startScore();
   } else if (state.state == 6){
     endScore();
-    gameOver();
-  }
+    if (state.round == 3) {
+      gameOver();
+    } else {
+      state.state = 0;
+      handleNext();
+      return;
+    }
+  } 
 
   updateAll();
 }

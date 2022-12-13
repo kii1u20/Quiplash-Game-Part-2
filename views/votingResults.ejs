@@ -1,6 +1,6 @@
 <p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex]).text}}</p>
-<div class="parent">
-    <div class="child">
+<div class="boxContainer">
+    <div class="box1">
         <p>{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]].answer1)[0]}}</p>
         <p>{{Object.keys(prompts[Object.keys(prompts)[currentPromptIndex]].answer1)[0]}}</p>
         <div v-for="item of prompts[Object.keys(prompts)[currentPromptIndex]].votes">
@@ -11,7 +11,7 @@
             </div>
         </div>
     </div>
-    <div class="child">
+    <div class="box2">
         <p>{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]].answer2)[0]}}</p>
         <p>{{Object.keys(prompts[Object.keys(prompts)[currentPromptIndex]].answer2)[0]}}</p>
         <div v-for="item of prompts[Object.keys(prompts)[currentPromptIndex]].votes">

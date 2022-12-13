@@ -35,15 +35,23 @@ body {
     text-align: center;
 }
 
-.parent {
-    border: 1px solid black;
-    margin: 1rem;
-    padding: 2rem 2rem;
-    text-align: center;
-  }
-  .child {
+.box1 {
+    width: 200px;
+    height: 200px;
+    background-color: red;
     display: inline-block;
-    border: 1px solid red;
-    padding: 1rem 1rem;
-    vertical-align: middle;
-  }
+    text-align: center;
+    box-sizing: border-box;
+}
+.box2 {
+    width: 200px;
+    height: 200px;
+    background-color: red;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.boxContainer {
+    text-align: center;
+}
