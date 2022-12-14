@@ -70,13 +70,13 @@ var app = new Vue({
 
             this.currentPromptIndex++;
 
-            for (this.currentPromptIndex; this.currentPromptIndex < Object.keys(this.prompts).length; this.currentPromptIndex++) {
-                console.log(answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]]));
-                if (!answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]])) {
-                    this.lastPromptIndex = this.currentPromptIndex;
-                    break;
-                }
-            }
+            // for (this.currentPromptIndex; this.currentPromptIndex < Object.keys(this.prompts).length; this.currentPromptIndex++) {
+            //     console.log(answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]]));
+            //     if (!answeredByUser(this.prompts[Object.keys(this.prompts)[this.currentPromptIndex]])) {
+            //         this.lastPromptIndex = this.currentPromptIndex;
+            //         break;
+            //     }
+            // }
         }
     }
 });
@@ -127,13 +127,13 @@ function connect() {
         app.prompts = JSON.parse(message);
         app.currentPromptIndex = 0;
 
-        for (app.currentPromptIndex; app.currentPromptIndex < Object.keys(app.prompts).length; app.currentPromptIndex++) {
-            console.log(answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]]));
-            if (!answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]])) {
-                app.lastPromptIndex = app.currentPromptIndex;
-                break;
-            }
-        }
+        // for (app.currentPromptIndex; app.currentPromptIndex < Object.keys(app.prompts).length; app.currentPromptIndex++) {
+        //     console.log(answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]]));
+        //     if (!answeredByUser(app.prompts[Object.keys(app.prompts)[app.currentPromptIndex]])) {
+        //         app.lastPromptIndex = app.currentPromptIndex;
+        //         break;
+        //     }
+        // }
     });
 
     socket.on('result', function(message) {

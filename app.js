@@ -282,6 +282,17 @@ function endVote() {
 }
 
 function startResult() {
+  console.log(votesReceived);
+  cloudPrompts.forEach(element => {
+    if (!Object.keys(votesReceived).includes(JSON.stringify(element))) {
+      let username = element.username;
+      let text = element.text;
+      let answer1 = answersReceived.get(JSON.stringify({"username": username, "text": text}))[0];
+      let answer2 = answersReceived.get(JSON.stringify({"username": username, "text": text}))[1];
+      let votes = [];
+      votesReceived[JSON.stringify({"username": username, "text": text})] = {"answer1" : answer1, "answer2" : answer2, "votes" : votes};
+    }
+  });
   players.forEach(element => {
     clientToSockets.get(element).emit('result', votesReceived);    
   });

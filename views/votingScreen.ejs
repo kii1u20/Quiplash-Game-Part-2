@@ -1,11 +1,22 @@
 <div v-if="prompts != undefined && currentPromptIndex < Object.keys(prompts).length">
     <p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex]).text}}</p>
-    <button class="btn btn-lg btn-primary" @click="vote(0)">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][0])[0]}}</button>
-    <button class="btn btn-lg btn-primary" @click="vote(1)">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][1])[0]}}</button>
+    <div v-if="Object.keys(prompts[Object.keys(prompts)[currentPromptIndex]][0])[0] != me.name">
+        <button class="btn btn-lg btn-primary" @click="vote(0)">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][0])[0]}}</button>
+    </div>
+    <div v-else>
+        <p>You cannot vote for yourself</p>
+    </div>
+
+    <div v-if="Object.keys(prompts[Object.keys(prompts)[currentPromptIndex]][1])[0] != me.name">
+        <button class="btn btn-lg btn-primary" @click="vote(1)">{{Object.values(prompts[Object.keys(prompts)[currentPromptIndex]][1])[0]}}</button>
+    </div>
+    <div v-else>
+        <p>You cannot vote for yourself</p>
+    </div>
     <!-- this may break if there is no second answer because of the indexes! -->
     <!-- There is a type error thrown by the Object.keys or Object.values. May not be a problem though -->
 </div>
 <div v-else>
-    <p class="title">{{JSON.parse(Object.keys(prompts)[lastPromptIndex]).text}}</p>
+    <p class="title">{{JSON.parse(Object.keys(prompts)[currentPromptIndex - 1]).text}}</p>
     <p>Waiting for everyone to vote...</p>
 </div>
