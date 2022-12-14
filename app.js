@@ -3,6 +3,7 @@
 //Set up express
 const express = require('express');
 const https = require('https');
+const { reset } = require('nodemon');
 const app = express();
 
 //Setup socket.io
@@ -335,12 +336,21 @@ function handleNext() {
       gameOver();
     } else {
       state.state = 0;
+      resetRound();
       handleNext();
       return;
     }
   } 
 
   updateAll();
+}
+
+function resetRound() {
+  activePrompts = new Map();
+  cloudPrompts = [];
+  answersReceived = new Map();
+  votesReceived = {};
+  currentPrompts = [];
 }
 
 //Handle new connection

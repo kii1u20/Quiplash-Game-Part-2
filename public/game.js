@@ -8,7 +8,7 @@ var app = new Vue({
         prompts: [],
         prompt: '',
         me: {name: '', score: 0, state: 0},
-        state: {state: 0},
+        state: {state: 0, round: 0},
         players: [],
         loggedIn: false,
         isAdmin: false,
@@ -39,6 +39,9 @@ var app = new Vue({
             socket.emit('register', {username: username, password: password});
         },
         updateState(state) {
+            if (state.state.round != this.state.round && this.state.round != 0) {
+                this.reset();
+            }
             this.me = state.me;
             this.state = state.state;
             this.players = state.players;
@@ -77,6 +80,13 @@ var app = new Vue({
             //         break;
             //     }
             // }
+        },
+        reset() {
+            this.prompts = [];
+            this.prompt = '';
+            this.currentPromptIndex = 0;
+            this.lastPromptIndex = 0;
+            this.answer = '';
         }
     }
 });

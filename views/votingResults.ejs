@@ -1,7 +1,4 @@
 <div v-for="index in Object.keys(prompts).length" :key="index">
-    <p>
-        test {{index - 1}}
-    </p>
     <p class="title">{{JSON.parse(Object.keys(prompts)[index - 1]).text}}</p>
     <div class="boxContainer">
         <div class="box1">
