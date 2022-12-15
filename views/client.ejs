@@ -30,6 +30,9 @@
             <div v-if="state.state == 4">
                 <%- include('votingResults'); -%>
             </div>
+            <div v-if="state.state == 5">
+                <%- include('scores'); -%>
+            </div>
             <!-- <%- include('chat'); -%> -->
         </div>
         <div v-else>

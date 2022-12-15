@@ -1,3 +1,12 @@
+<p class="title">Round Scores</p>
+<div class="boxContainer">
+    <div class="box1">
+        <div v-for="key of Object.keys(scores)">
+            <p>{{scores[key].name}} : {{scores[key].score}}</p>
+        </div>
+    </div>
+</div>
+
 <div v-for="index in Object.keys(prompts).length" :key="index">
     <p class="title">{{JSON.parse(Object.keys(prompts)[index - 1]).text}}</p>
     <div class="boxContainer">
@@ -6,7 +15,7 @@
             <p>Creator: {{Object.keys(prompts[Object.keys(prompts)[index - 1]].answer1)[0]}}</p>
             <p>Votes:</p>
             <div v-for="item of prompts[Object.keys(prompts)[index - 1]].votes">
-                <div v-if="Object.values(item.vote)[0] == Object.values(prompts[Object.keys(prompts)[index - 1]].answer1)[0]">
+                <div v-if="JSON.stringify(item.vote) == JSON.stringify(prompts[Object.keys(prompts)[index - 1]].answer1)">
                     <p>
                         {{item.username}}
                     </p>
@@ -18,7 +27,7 @@
             <p>Creator: {{Object.keys(prompts[Object.keys(prompts)[index - 1]].answer2)[0]}}</p>
             <p>Votes:</p>
             <div v-for="item of prompts[Object.keys(prompts)[index - 1]].votes">
-                <div v-if="Object.values(item.vote)[0] == Object.values(prompts[Object.keys(prompts)[index - 1]].answer2)[0]">
+                <div v-if="JSON.stringify(item.vote) == JSON.stringify(prompts[Object.keys(prompts)[index - 1]].answer2)">
                     <p>
                         {{item.username}}
                     </p>

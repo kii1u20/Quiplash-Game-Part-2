@@ -1,0 +1,8 @@
+<p class="title">Scores</p>
+<div class="boxContainer">
+    <div class="box1">
+        <div v-for="key of Object.keys(scores)">
+            <p>{{scores[key].name}} : {{scores[key].score}}</p>
+        </div>
+    </div>
+</div>

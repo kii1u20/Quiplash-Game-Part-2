@@ -35,6 +35,7 @@ let votesReceived = {};
 let currentPrompts = [];
 let state = {state: 0, round: 0};
 let admin;
+let roundScores = new Map();
 
 const requestOptions = {
   method: 'POST',
@@ -155,7 +156,7 @@ function handlePrompt(prompt, password, socket) {
   promise.then((res) => {
       console.log(res)
       if (res.result == true) {
-        currentPrompts.push({username: socketsToClients.get(socket), text: prompt});
+        currentPrompts.push({"username": socketsToClients.get(socket), "text": prompt});
         connected_clients.get(socketsToClients.get(socket)).state = 1;
         updatePlayer(socketsToClients.get(socket), socket);
       } else {
@@ -213,8 +214,8 @@ function startAnswer() {
   promise.then((res) => {
       if (res.length > 0) {
         res.forEach(element => {
-          cloudPrompts.push(element);
-          cloudPrompts.push(element);
+          cloudPrompts.push({"username": element.username, "text": element.text});
+          cloudPrompts.push({"username": element.username, "text": element.text});
         });
         for (let i = 0; i < Math.round(numberOfPrompts / 2); i++) {
           if (currentPrompts.length != 0) {
@@ -269,8 +270,8 @@ function handleVote(info) {
     votesReceived[info.prompt]['votes'].push(info.vote);
   }
   
-  console.log(votesReceived);
-  console.log(votesReceived[info.prompt]['votes']);
+  // console.log(votesReceived);
+  // console.log(votesReceived[info.prompt]['votes']);
 }
 function startVote() {
   console.log("starting vote");
@@ -279,11 +280,32 @@ function startVote() {
   }
 }
 function endVote() {
-
+  let tempMap = new Map();
+  for (let key of Object.keys(votesReceived)) {
+    for (let vote of votesReceived[key].votes) {
+      if (tempMap.has(Object.keys(vote.vote)[0])) {
+        let votes = tempMap.get(Object.keys(vote.vote)[0]);
+        tempMap.set(Object.keys(vote.vote)[0], votes + 1);
+      } else {
+        tempMap.set(Object.keys(vote.vote)[0], 1);
+      }
+    }
+  }
+  players.forEach(player => {
+    if (tempMap.has(player)) {
+      connected_clients.get(player).score += state.round * tempMap.get(player) * 100;
+      roundScores.set(player, {name: player, score: state.round * tempMap.get(player) * 100});
+    } else {
+      roundScores.set(player, {name: player, score: 0});
+    }
+  });
+  players.forEach(element => {
+    clientToSockets.get(element).emit('scores', Object.fromEntries(roundScores));
+  });
 }
 
 function startResult() {
-  console.log(votesReceived);
+  // console.log(votesReceived);
   cloudPrompts.forEach(element => {
     if (!Object.keys(votesReceived).includes(JSON.stringify(element))) {
       let username = element.username;
@@ -303,7 +325,9 @@ function endResult() {
 }
 
 function startScore() {
-
+  players.forEach(element => {
+    clientToSockets.get(element).emit('scores', Object.fromEntries(connected_clients));
+  });
 }
 function endScore() {
 
@@ -351,6 +375,7 @@ function resetRound() {
   answersReceived = new Map();
   votesReceived = {};
   currentPrompts = [];
+  roundScores = new Map();
 }
 
 //Handle new connection
