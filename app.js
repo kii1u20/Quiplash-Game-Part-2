@@ -24,6 +24,7 @@ app.get('/display', (req, res) => {
 });
 
 let connected_clients = new Map();
+let connections = [];
 const players = [];
 const audience = [];
 let clientToSockets = new Map();
@@ -81,9 +82,13 @@ function startServer() {
 }
 
 function updateAll() {
-  for (let [user, socket] of clientToSockets) {
-    updatePlayer(user, socket);
-  }
+  connections.forEach(element => {
+    if (Object.values(Object.fromEntries(clientToSockets)).includes(element)) {
+      updatePlayer(socketsToClients.get(element), element);
+    } else {
+      element.emit('state', {state: state, me: {name: '', score: 0, state: 0}, players: players});
+    }
+  });
 }
 
 function updatePlayer(user, socket) {
@@ -299,7 +304,7 @@ function endVote() {
       roundScores.set(player, {name: player, score: 0});
     }
   });
-  players.forEach(element => {
+  Object.keys(Object.fromEntries(clientToSockets)).forEach(element => {
     clientToSockets.get(element).emit('scores', Object.fromEntries(roundScores));
   });
 }
@@ -316,7 +321,8 @@ function startResult() {
       votesReceived[JSON.stringify({"username": username, "text": text})] = {"answer1" : answer1, "answer2" : answer2, "votes" : votes};
     }
   });
-  players.forEach(element => {
+  
+  Object.keys(Object.fromEntries(clientToSockets)).forEach(element => {
     clientToSockets.get(element).emit('result', votesReceived);    
   });
 }
@@ -325,7 +331,7 @@ function endResult() {
 }
 
 function startScore() {
-  players.forEach(element => {
+  Object.keys(Object.fromEntries(clientToSockets)).forEach(element => {
     clientToSockets.get(element).emit('scores', Object.fromEntries(connected_clients));
   });
 }
@@ -359,7 +365,6 @@ function handleNext() {
     if (state.round == 3) {
       gameOver();
     } else {
-      state.state = 0;
       resetRound();
       handleNext();
       return;
@@ -370,6 +375,7 @@ function handleNext() {
 }
 
 function resetRound() {
+  state.state = 0;
   activePrompts = new Map();
   cloudPrompts = [];
   answersReceived = new Map();
@@ -378,18 +384,32 @@ function resetRound() {
   roundScores = new Map();
 }
 
+function restartGame() {
+  state.state = 0;
+  state.round = 0;
+  activePrompts = new Map();
+  cloudPrompts = [];
+  answersReceived = new Map();
+  votesReceived = {};
+  currentPrompts = [];
+  roundScores = new Map();
+
+  Object.keys(connected_clients).forEach(element => {
+    connected_clients.get(element).score = 0;
+  });
+}
+
 //Handle new connection
 io.on('connection', socket => { 
   console.log('New connection');
 
-  //Handle on chat message received
-  socket.on('chat', message => {
-    handleChat(message);
-  });
+  connections.push(socket);
+  updateAll();
 
   //Handle disconnection
   socket.on('disconnect', () => {
     console.log('Dropped connection');
+    connections = connections.splice(connections.indexOf(socket), 1);
     const player = socketsToClients.get(socket);
     const index = players.indexOf(player);
     if (index > -1) {
@@ -433,6 +453,13 @@ io.on('connection', socket => {
   socket.on('next', info => {
     handleNext();
   });
+
+  socket.on('resetGame', () => {
+    console.log("resetting");
+    restartGame();
+    updateAll();
+  });
+
 });
 
 //Start server

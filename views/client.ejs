@@ -5,33 +5,35 @@
 
     <h2 class="title">ECS Example Game</h2>
     <div id="game">
-        <div class="admin">
-            <p><strong>Debug information:</strong>My state: {{me}} | Game state: {{state.state}} | Round: {{state.round}} | Players: {{players}}</p>
-            <button class="btn btn-lg btn-primary" @click="login('test', 'test1234')">Test</button>
-            <button class="btn btn-lg btn-primary" @click="login('test1', 'test1234')">Test1</button>
-            <button class="btn btn-lg btn-primary" @click="login('test2', 'test1234')">Test2</button>
-        </div>
         <div v-if="connected">
             <div v-if="loggedIn == false">
                 <%- include('login'); -%>
             </div>
             <div v-if="isAdmin">
-                <%- include('adminPanel'); -%>
+                <div v-if="state.state == 6">
+                    <button class="btn btn-lg btn-primary" @click="resetGame()">Restart Game</button>
+                </div>
+                <div v-else>
+                    <%- include('adminPanel'); -%>
+                </div>
             </div>
-            <div v-if="state.state == 1">
+            <div v-if="state.state == 1 && loggedIn == true">
                 <%- include('promptsSuggestion'); -%>
             </div>
-            <div v-if="state.state == 2">
+            <div v-if="state.state == 2 && loggedIn == true">
                 <%- include('promptAnswer'); -%>
             </div>
-            <div v-if="state.state == 3">
+            <div v-if="state.state == 3 && loggedIn == true">
                 <%- include('votingScreen'); -%>
             </div>
-            <div v-if="state.state == 4">
+            <div v-if="state.state == 4 && loggedIn == true">
                 <%- include('votingResults'); -%>
             </div>
-            <div v-if="state.state == 5">
+            <div v-if="state.state == 5 && loggedIn == true">
                 <%- include('scores'); -%>
+            </div>
+            <div v-if="state.state == 6 && loggedIn == true">
+                <%- include('gameOver'); -%>
             </div>
             <!-- <%- include('chat'); -%> -->
         </div>

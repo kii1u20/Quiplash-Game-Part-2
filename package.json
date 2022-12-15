@@ -7,7 +7,7 @@
     "node": "16.x"
   },
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
     "gdeploy": "gcloud app deploy --version test",
     "hdeploy": "git push heroku master"
   },

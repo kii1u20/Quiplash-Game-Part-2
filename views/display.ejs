@@ -7,12 +7,40 @@
 
     <div id="game">
         <div v-if="connected">
-            <ul id="chat">
-                <li v-for="message in messages">{{message}}</li>
-            </ul>
-        </div>
-        <div v-else>
-            <p>Connecting...</p>
+            <div v-if="state.state == 0">
+                <p>
+                    Waiting for players
+                </p>
+            </div>
+            <div v-if="state.state == 1">
+                <p>
+                    Prompt suggestion
+                </p>
+            </div>
+            <div v-if="state.state == 2">
+                <p>
+                    Answers being received
+                </p>
+            </div>
+            <div v-if="state.state == 3">
+                <p>
+                    Voting in progress
+                </p>
+            </div>
+            <div v-if="state.state == 4">
+                <p>
+                    Voting results
+                </p>
+            </div>
+            <div v-if="state.state == 5">
+                <p>
+                    Scores
+                </p>
+            </div>
+            <div v-if="state.state == 6">
+                <p>
+                    Game over
+                </p>
         </div>
     </div>
 

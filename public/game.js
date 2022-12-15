@@ -87,6 +87,10 @@ var app = new Vue({
             this.currentPromptIndex = 0;
             this.lastPromptIndex = 0;
             this.answer = '';
+        },
+        resetGame() {
+            console.log('resetGame');
+            socket.emit('resetGame', {});
         }
     }
 });
@@ -94,6 +98,8 @@ var app = new Vue({
 function connect() {
     //Prepare web socket
     socket = io();
+
+    
 
     //Connect
     socket.on('connect', function() {
@@ -146,6 +152,7 @@ function connect() {
     });
 
     socket.on('result', function(message) {
+        console.log(message);
         app.prompts = message;
         app.currentPromptIndex = 0;
     });
