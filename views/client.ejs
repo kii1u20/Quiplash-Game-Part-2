@@ -5,6 +5,12 @@
 
     <h2 class="title">ECS Example Game</h2>
     <div id="game">
+        <div class="admin">
+            <p><strong>Debug information:</strong>My state: {{me}} | Game state: {{state.state}} | Round: {{state.round}} | Players: {{players}}</p>
+            <button class="btn btn-lg btn-primary" @click="login('test', 'test1234')">Test</button>
+            <button class="btn btn-lg btn-primary" @click="login('test1', 'test1234')">Test1</button>
+            <button class="btn btn-lg btn-primary" @click="login('test2', 'test1234')">Test2</button>
+        </div>
         <div v-if="connected">
             <div v-if="loggedIn == false">
                 <%- include('login'); -%>

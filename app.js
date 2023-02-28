@@ -404,6 +404,7 @@ io.on('connection', socket => {
   console.log('New connection');
 
   connections.push(socket);
+  console.log(connections.length);
   updateAll();
 
   //Handle disconnection
